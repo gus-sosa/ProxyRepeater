@@ -1,15 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CommandLine;
 
 namespace ProxyRepeater
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
+            Parser.Default.ParseArguments<CommandLineArguments>(args)
+                .WithParsed(o =>
+                {
+                });
+        }
+
+        private class CommandLineArguments
+        {
+            [Option(HelpText = "Set port to listen from services")]
+            public int Port { get; set; }
+
+            [Option(HelpText = "Set port to receive commands from clients")]
+            public int WebApiPort { get; set; }
         }
     }
 }
