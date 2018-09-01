@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace ProxyRepeater
+namespace ProxyRepeater.Server
 {
     internal class Program
     {
