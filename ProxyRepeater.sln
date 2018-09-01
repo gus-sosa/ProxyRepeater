@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2003
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProxyRepeater", "ProxyRepeater\ProxyRepeater.csproj", "{155AA9E5-F5CD-48E5-A256-DC96F3076B51}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProxyRepeater.Server", "ProxyRepeater\ProxyRepeater.Server.csproj", "{155AA9E5-F5CD-48E5-A256-DC96F3076B51}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

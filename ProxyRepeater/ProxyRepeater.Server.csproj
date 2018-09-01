@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{155AA9E5-F5CD-48E5-A256-DC96F3076B51}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>ProxyRepeater</RootNamespace>
-    <AssemblyName>ProxyRepeater</AssemblyName>
+    <RootNamespace>ProxyRepeater.Server</RootNamespace>
+    <AssemblyName>ProxyRepeater.Server</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
