@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProxyRepeater.Server", "Pro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProxyRepeater.WpfClient", "ProxyRepeater.WpfClient\ProxyRepeater.WpfClient.csproj", "{775913E5-9427-4099-9BE0-6085CC0FEF3B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProxyRepeater.Server.Core", "ProxyRepeater.Server.Core\ProxyRepeater.Server.Core.csproj", "{3D15FC1E-C6C5-4386-8C75-7E6573F0F57D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{775913E5-9427-4099-9BE0-6085CC0FEF3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{775913E5-9427-4099-9BE0-6085CC0FEF3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{775913E5-9427-4099-9BE0-6085CC0FEF3B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D15FC1E-C6C5-4386-8C75-7E6573F0F57D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D15FC1E-C6C5-4386-8C75-7E6573F0F57D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D15FC1E-C6C5-4386-8C75-7E6573F0F57D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D15FC1E-C6C5-4386-8C75-7E6573F0F57D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
