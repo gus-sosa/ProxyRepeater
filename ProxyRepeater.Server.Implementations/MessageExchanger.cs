@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ProxyRepeater.Server.Implementations
 {
-    public class MessageExchanger : IExchanger
+    public class MessageExchanger : IMsgDeliverer
     {
         public ErrorNumber AddClient(ExClient client)
         {
