@@ -1,32 +1,23 @@
 ﻿using ProxyRepeater.Server.Core;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace ProxyRepeater.Server.Implementations
 {
     public class MsgClientDispatcher : IExchanger
     {
-        public ErrorNumber AddClient(ExClient client)
-        {
-            throw new NotImplementedException();
-        }
+        public ConcurrentDictionary<string , ExClient> Clients { get; set; }
 
-        public void ClearClients()
-        {
-            throw new NotImplementedException();
-        }
+        public ErrorNumber AddClient(ExClient client) => Clients.TryAdd(client.Name , client) ? ErrorNumber.NoError : ErrorNumber.NoError;
 
-        public ErrorNumber DeleteClient(ExClient client)
-        {
-            throw new NotImplementedException();
-        }
+        public void ClearClients() => Clients.Clear();
+
+        public ErrorNumber DeleteClient(ExClient client) => Clients.TryRemove(client.Name , out _) ? ErrorNumber.NoError : ErrorNumber.ClientDoesNotExist;
+
+        public IEnumerable<ExClient> GetClients() => Clients.Values;
 
         public void DeliverMessage(IClientMsg msg)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<ExClient> GetClients()
         {
             throw new NotImplementedException();
         }
