@@ -2,7 +2,7 @@
 
 namespace ProxyRepeater.Server.Core
 {
-    public interface IMsgDeliverer : IMsgDeliverer
+    public interface IExchanger : IMsgDeliverer
     {
         ErrorNumber AddClient(ExClient client);
         ErrorNumber DeleteClient(ExClient client);
