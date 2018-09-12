@@ -3,6 +3,7 @@ using System;
 using System.Net;
 using System.Threading.Tasks;
 using Titanium.Web.Proxy;
+using Titanium.Web.Proxy.EventArguments;
 using Titanium.Web.Proxy.Models;
 
 namespace ProxyRepeater.Server.Implementations
@@ -31,7 +32,7 @@ namespace ProxyRepeater.Server.Implementations
 
         public void Stop() => _proxyServer.Stop();
 
-        private Task AfterResponseEvent(object sender , Titanium.Web.Proxy.EventArguments.SessionEventArgs e)
+        private Task AfterResponseEvent(object sender , SessionEventArgs e)
         {
             throw new NotImplementedException();
         }
