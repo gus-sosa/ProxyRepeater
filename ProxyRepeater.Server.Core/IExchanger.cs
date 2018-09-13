@@ -7,6 +7,7 @@ namespace ProxyRepeater.Server.Core
         ErrorNumber AddClient(ExClient client);
         ErrorNumber DeleteClient(ExClient client);
         IEnumerable<ExClient> GetClients();
+        ExClient GetClient(string name);
         void ClearClients();
     }
 }
