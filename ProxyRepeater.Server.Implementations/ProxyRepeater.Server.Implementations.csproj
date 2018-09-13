@@ -34,6 +34,9 @@
     <Reference Include="BouncyCastle.Crypto, Version=1.8.3.0, Culture=neutral, PublicKeyToken=0e99375e54769942, processorArchitecture=MSIL">
       <HintPath>..\packages\Portable.BouncyCastle.1.8.3\lib\net40\BouncyCastle.Crypto.dll</HintPath>
     </Reference>
+    <Reference Include="Polly, Version=6.0.0.0, Culture=neutral, PublicKeyToken=c8a3ffc3f8f825cc, processorArchitecture=MSIL">
+      <HintPath>..\packages\Polly.6.1.0\lib\netstandard2.0\Polly.dll</HintPath>
+    </Reference>
     <Reference Include="StreamExtended, Version=1.0.179.0, Culture=neutral, PublicKeyToken=bbfa0f1d54f50043, processorArchitecture=MSIL">
       <HintPath>..\packages\StreamExtended.1.0.179\lib\net45\StreamExtended.dll</HintPath>
     </Reference>
@@ -51,7 +54,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClientMessage.cs" />
-    <Compile Include="MessageExchanger.cs" />
     <Compile Include="Models\HttpMsg.cs" />
     <Compile Include="Models\HttpTitaniumSessionAdapter.cs" />
     <Compile Include="MsgClientDispatcher.cs" />

@@ -1,8 +1,11 @@
-﻿using ProxyRepeater.Server.Core;
+﻿using Polly;
+using ProxyRepeater.Server.Core;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,16 +21,30 @@ namespace ProxyRepeater.Server.Implementations
                 public Queue<ExClient> ClientsToDeliver { get; set; } = new Queue<ExClient>();
             }
 
+            private class NonExistingClientException : Exception
+            {
+            }
+
             private const string ParameterNameForConsumerNewMsgs = "NumThreadsToConsumeNewMsgs";
             private const string ParameterNameForNumWorkers = "NumWorkersToDeliverMsgs";
             private readonly int _numThreadsToConsumeNewMsgs;
-            public readonly int _numWorkersToDeliverMsgs;
-            private const int _timeToWaitWhenEmptyQueue = 5000;
+            private readonly int _numWorkersToDeliverMsgs;
+            private const int _timeToWaitBeforeRetryInMs = 10000;
+            private const int _numTimesToRetry = 3;
+            private const int _timeToWaitWhenEmptyQueueInMs = 5000;
+            private const int _callsTimeoutInMs = 30;
+            private readonly HttpStatusCode[] httpStatusCodesWorthRetrying = new[]{
+               HttpStatusCode.RequestTimeout, // 408
+               HttpStatusCode.InternalServerError, // 500
+               HttpStatusCode.BadGateway, // 502
+               HttpStatusCode.ServiceUnavailable, // 503
+               HttpStatusCode.GatewayTimeout // 504
+            };
 
             private readonly ConcurrentDictionary<Guid , MsgPendingModel> _pendingMsgs = new ConcurrentDictionary<Guid , MsgPendingModel>();
             private readonly ConcurrentQueue<Guid> _msgsToDeliver = new ConcurrentQueue<Guid>();
 
-            public Dispatcher()
+            public Dispatcher(MsgClientDispatcher msgClientDispatcher)
             {
                 void SetConfigurationValueByParameterName<T>(string parameterNameForConsumerNewMsgs , T defaultValue , ref T variable)
                 {
@@ -51,6 +68,7 @@ namespace ProxyRepeater.Server.Implementations
 
                 NewMsgsConsumerTasks = CreateThreadWorkers(_numThreadsToConsumeNewMsgs , ProcessNewMessage);
                 DeliverWorkerTasks = CreateThreadWorkers(_numWorkersToDeliverMsgs , DeliverMsg);
+                MsgClientDispatcher = msgClientDispatcher;
             }
 
             private async void DeliverMsg()
@@ -62,9 +80,35 @@ namespace ProxyRepeater.Server.Implementations
                         ExClient clientToDeliverMsg = msgPending.ClientsToDeliver.Dequeue();
                         if (msgPending.ClientsToDeliver.Count > 0) _msgsToDeliver.Enqueue(msgGuid);
                         else _pendingMsgs.TryRemove(msgGuid , out _);
+
+                        PolicyResult<HttpResponseMessage> httpResponseMsg = await Policy
+                            .Handle<HttpRequestException>()
+                            .OrResult<HttpResponseMessage>(r => httpStatusCodesWorthRetrying.Contains(r.StatusCode))
+                            .WaitAndRetry(Enumerable.Repeat(TimeSpan.FromMilliseconds(_timeToWaitBeforeRetryInMs) , _numTimesToRetry) , (exception , retryCount , context) =>
+                              {
+                                  //TODO-LOG: Log error + count 
+                              })
+                              .ExecuteAndCaptureAsync(async () => await Task.Factory.StartNew(() =>
+                              {
+                                  MsgClientDispatcher.Clients.TryGetValue(clientToDeliverMsg.Name , out ExClient clientToCompare);
+                                  if (clientToCompare == null || clientToCompare != clientToDeliverMsg)
+                                      throw new NonExistingClientException();
+                                  return SendMsg(msgPending.Message , clientToDeliverMsg);
+                              }));
+
+                        if (httpResponseMsg.Outcome == OutcomeType.Failure && !(httpResponseMsg.FinalException is NonExistingClientException))
+                        {
+                            //TODO-LOG: Log error
+                            MsgClientDispatcher.Clients.TryRemove(clientToDeliverMsg.Name , out _);
+                        }
                     }
                 }
-                else await Task.Delay(_timeToWaitWhenEmptyQueue);
+                else await Task.Delay(_timeToWaitWhenEmptyQueueInMs);
+            }
+
+            private HttpResponseMessage SendMsg(string message , ExClient clientToDeliverMsg)
+            {
+                throw new NotImplementedException();
             }
 
             private async void ProcessNewMessage()
@@ -72,22 +116,22 @@ namespace ProxyRepeater.Server.Implementations
                 if (NewMsgArrivals.TryDequeue(out var newMsg))
                 {
                     var pendingMsg = new MsgPendingModel() { Message = newMsg };
-                    foreach (ExClient item in Clients.Select(i => i.Value))
+                    foreach (ExClient item in MsgClientDispatcher.Clients.Values)
                         pendingMsg.ClientsToDeliver.Enqueue(item);
                     var guid = Guid.NewGuid();
                     _pendingMsgs[guid] = pendingMsg;
                     _msgsToDeliver.Enqueue(guid);
                 }
-                else await Task.Delay(_timeToWaitWhenEmptyQueue);
+                else await Task.Delay(_timeToWaitWhenEmptyQueueInMs);
             }
 
             public ConcurrentQueue<string> NewMsgArrivals { get; set; }
             public IEnumerable<(Task Task, CancellationTokenSource CancellationSource)> NewMsgsConsumerTasks { get; private set; }
             public IEnumerable<(Task Task, CancellationTokenSource CancellationSource)> DeliverWorkerTasks { get; private set; }
-            public IEnumerable<KeyValuePair<string , ExClient>> Clients { get; private set; }
+            public MsgClientDispatcher MsgClientDispatcher { get; }
         }
 
-        protected Dispatcher _dispatcher = new Dispatcher();
+        protected Dispatcher _dispatcher;
 
         public ConcurrentDictionary<string , ExClient> Clients { get; set; }
 
@@ -110,7 +154,7 @@ namespace ProxyRepeater.Server.Implementations
             }
 
             if (_dispatcher == null)
-                _dispatcher = new Dispatcher();
+                _dispatcher = new Dispatcher(this);
 
             StartTasks(_dispatcher.NewMsgsConsumerTasks.Select(i => i.Task));
             StartTasks(_dispatcher.DeliverWorkerTasks.Select(i => i.Task));
