@@ -1,4 +1,5 @@
-﻿using Polly;
+﻿using Flurl.Http;
+using Polly;
 using ProxyRepeater.Server.Core;
 using System;
 using System.Collections.Concurrent;
@@ -93,7 +94,7 @@ namespace ProxyRepeater.Server.Implementations
                                   MsgClientDispatcher.Clients.TryGetValue(clientToDeliverMsg.Name , out ExClient clientToCompare);
                                   if (clientToCompare == null || clientToCompare != clientToDeliverMsg)
                                       throw new NonExistingClientException();
-                                  return SendMsg(msgPending.Message , clientToDeliverMsg);
+                                  return SendMsg(msgPending.Message , clientToDeliverMsg).Result;
                               }));
 
                         if (httpResponseMsg.Outcome == OutcomeType.Failure && !(httpResponseMsg.FinalException is NonExistingClientException))
@@ -106,10 +107,8 @@ namespace ProxyRepeater.Server.Implementations
                 else await Task.Delay(_timeToWaitWhenEmptyQueueInMs);
             }
 
-            private HttpResponseMessage SendMsg(string message , ExClient clientToDeliverMsg)
-            {
-                throw new NotImplementedException();
-            }
+            private async Task<HttpResponseMessage> SendMsg(string message , ExClient client) => await $"https://{client.IpAddress.ToString()}:{client.Port}"
+                    .PostJsonAsync(new { Message = message });
 
             private async void ProcessNewMessage()
             {
