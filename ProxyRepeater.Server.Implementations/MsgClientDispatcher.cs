@@ -15,14 +15,14 @@ namespace ProxyRepeater.Server.Implementations
             private class MsgPendingModel
             {
                 public string Message { get; set; }
-                public List<ExClient> ClientsToDeliver { get; set; } = new List<ExClient>();
+                public Queue<ExClient> ClientsToDeliver { get; set; } = new Queue<ExClient>();
             }
 
             private const string ParameterNameForConsumerNewMsgs = "NumThreadsToConsumeNewMsgs";
             private const string ParameterNameForNumWorkers = "NumWorkersToDeliverMsgs";
             private readonly int _numThreadsToConsumeNewMsgs;
             public readonly int _numWorkersToDeliverMsgs;
-            private const int _timeToWaitInMsToConsumeNewMsgsAfterNoMsgsInQueue = 5000;
+            private const int _timeToWaitWhenEmptyQueue = 5000;
 
             private readonly ConcurrentDictionary<Guid , MsgPendingModel> _pendingMsgs = new ConcurrentDictionary<Guid , MsgPendingModel>();
             private readonly ConcurrentQueue<Guid> _msgsToDeliver = new ConcurrentQueue<Guid>();
@@ -31,7 +31,6 @@ namespace ProxyRepeater.Server.Implementations
             {
                 void SetConfigurationValueByParameterName<T>(string parameterNameForConsumerNewMsgs , T defaultValue , ref T variable)
                 {
-                    //TODO: Try to get values from configuration file
                     variable = defaultValue;
                 }
 
@@ -56,7 +55,16 @@ namespace ProxyRepeater.Server.Implementations
 
             private async void DeliverMsg()
             {
-                throw new NotImplementedException();
+                if (_msgsToDeliver.TryDequeue(out Guid msgGuid))
+                {
+                    if (_pendingMsgs.TryGetValue(msgGuid , out MsgPendingModel msgPending))
+                    {
+                        ExClient clientToDeliverMsg = msgPending.ClientsToDeliver.Dequeue();
+                        if (msgPending.ClientsToDeliver.Count > 0) _msgsToDeliver.Enqueue(msgGuid);
+                        else _pendingMsgs.TryRemove(msgGuid , out _);
+                    }
+                }
+                else await Task.Delay(_timeToWaitWhenEmptyQueue);
             }
 
             private async void ProcessNewMessage()
@@ -64,12 +72,13 @@ namespace ProxyRepeater.Server.Implementations
                 if (NewMsgArrivals.TryDequeue(out var newMsg))
                 {
                     var pendingMsg = new MsgPendingModel() { Message = newMsg };
-                    pendingMsg.ClientsToDeliver.AddRange(Clients.Select(i => i.Value));
+                    foreach (ExClient item in Clients.Select(i => i.Value))
+                        pendingMsg.ClientsToDeliver.Enqueue(item);
                     var guid = Guid.NewGuid();
                     _pendingMsgs[guid] = pendingMsg;
                     _msgsToDeliver.Enqueue(guid);
                 }
-                else await Task.Delay(_timeToWaitInMsToConsumeNewMsgsAfterNoMsgsInQueue);
+                else await Task.Delay(_timeToWaitWhenEmptyQueue);
             }
 
             public ConcurrentQueue<string> NewMsgArrivals { get; set; }
