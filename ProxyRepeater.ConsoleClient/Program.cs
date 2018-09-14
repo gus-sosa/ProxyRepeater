@@ -8,19 +8,18 @@ namespace ProxyRepeater.ConsoleClient
     {
         private class ConsoleOptions
         {
-            private string _serverName;
-            private readonly Regex ipRegex = new Regex("sadf");
-            private readonly Regex serverNameRegex = new Regex("asdf");
+            private string _serverIp;
+            private readonly Regex ipRegex = new Regex("\b(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\b");
 
-            [Option(shortName: 's' , longName: "server-name" , HelpText = "Ip or address to the proxy repeater server" , Required = true)]
-            public string ServerName
+            [Option(shortName: 's' , longName: "server-ip" , HelpText = "Proxy repeater ip" , Required = true)]
+            public string ServerIp
             {
-                get => _serverName;
+                get => _serverIp;
                 set
                 {
-                    if (!ipRegex.IsMatch(value) && !serverNameRegex.IsMatch(value))
-                        throw new ArgumentException("The server name provided is not valid");
-                    _serverName = value;
+                    if (!ipRegex.IsMatch(value))
+                        throw new ArgumentException("The server ip provided is not valid");
+                    _serverIp = value;
                 }
             }
 
@@ -36,7 +35,7 @@ namespace ProxyRepeater.ConsoleClient
                 .WithParsed(options =>
                 {
                     RunLocalWebServer(options.PortToListen);
-                    ConnectWithProxyRepeater(options.ServerName , options.PortToListen);
+                    ConnectWithProxyRepeater(options.ServerIp , options.PortToListen);
                 });
 
         private static void ConnectWithProxyRepeater(string serverName , int portToListen)
