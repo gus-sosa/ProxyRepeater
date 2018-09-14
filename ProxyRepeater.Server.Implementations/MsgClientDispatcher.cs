@@ -180,5 +180,11 @@ namespace ProxyRepeater.Server.Implementations
             StopDeliverProcess();
             StartDeliverProcess();
         }
+
+        public ExClient GetClient(string name)
+        {
+            Clients.TryGetValue(name , out ExClient client);
+            return client;
+        }
     }
 }
