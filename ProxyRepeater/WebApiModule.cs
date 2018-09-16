@@ -1,5 +1,6 @@
 ﻿using Nancy;
 using ProxyRepeater.Server.Core;
+using System.Linq;
 using System.Net;
 
 namespace ProxyRepeater.Server
@@ -29,7 +30,7 @@ namespace ProxyRepeater.Server
         private void RegisterRoutes()
         {
             Get["/test"] = _ => GOOD_SERVER;
-            Get["/"] = _ => Response.AsJson(exchanger.GetClients());
+            Get["/"] = _ => Response.AsJson(exchanger.GetClients().Select(m => GetExClientViewModel(m)));
             Post["/{clientName}/{port:int}"] = parameters =>
             {
                 IPAddress.TryParse(Context.Request.UserHostAddress , out IPAddress ip);
@@ -38,6 +39,13 @@ namespace ProxyRepeater.Server
             Delete["/{clientName}"] = parameters => RemoveClient(parameters.clientName);
             Get["/Ping/{clientName}"] = parameters => PingClient(parameters.clientName);
         }
+
+        private object GetExClientViewModel(ExClient m) => new ExClientViewModel()
+        {
+            IpAddres = m.IpAddress.ToString() ,
+            Name = m.Name ,
+            Port = m.Port
+        };
 
         private dynamic PingClient(string clientName) => exchanger.GetClient(clientName) != null ? "Ok" : Response.AsJson(ErrorMessage.NewErrorMessage($"{FAILED}: That client does not exist" , (int)ErrorNumber.ClientDoesNotExist) , Nancy.HttpStatusCode.InternalServerError);
 
