@@ -3,7 +3,7 @@ using Nancy.ModelBinding;
 
 namespace ProxyRepeater.ConsoleClient
 {
-    internal class LocalWebServer : NancyModule
+    public class LocalWebServer : NancyModule
     {
         private const string OK = "OK";
 
@@ -16,6 +16,8 @@ namespace ProxyRepeater.ConsoleClient
 
         public LocalWebServer()
         {
+            Get["/test"] = _ => "GOOD";
+
             Post["/"] = _ =>
              {
                  ServerMessageModel model = this.Bind<ServerMessageModel>();

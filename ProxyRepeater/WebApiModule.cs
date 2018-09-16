@@ -4,7 +4,7 @@ using System.Net;
 
 namespace ProxyRepeater.Server
 {
-    internal class WebApiModule : NancyModule
+    public class WebApiModule : NancyModule
     {
         private readonly IExchanger exchanger;
 
