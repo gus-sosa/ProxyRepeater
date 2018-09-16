@@ -134,7 +134,7 @@ namespace ProxyRepeater.Server.Implementations
 
         public ConcurrentDictionary<string , ExClient> Clients { get; set; } = new ConcurrentDictionary<string , ExClient>();
 
-        public ErrorNumber AddClient(ExClient client) => Clients.TryAdd(client.Name , client) ? ErrorNumber.NoError : ErrorNumber.NoError;
+        public ErrorNumber AddClient(ExClient client) => Clients.TryAdd(client.Name , client) ? ErrorNumber.NoError : ErrorNumber.ExistingClient;
 
         public void ClearClients() => Clients.Clear();
 

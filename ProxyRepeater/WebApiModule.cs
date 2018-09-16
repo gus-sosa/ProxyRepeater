@@ -55,7 +55,7 @@ namespace ProxyRepeater.Server
         {
             var client = new ExClient() { Name = clientName , IpAddress = ip , Port = port };
             ErrorNumber error = exchanger.AddClient(client);
-            return error == ErrorNumber.NoError ? OK : Response.AsJson(ErrorMessage.NewErrorMessage($"Problem with the request: ErrorNumber: {error}" , (int)ErrorNumber.ExistingClient));
+            return error == ErrorNumber.NoError ? OK : Response.AsJson(ErrorMessage.NewErrorMessage($"Problem with the request: ErrorNumber: {error}" , (int)ErrorNumber.ExistingClient) , Nancy.HttpStatusCode.InternalServerError);
         }
     }
 }

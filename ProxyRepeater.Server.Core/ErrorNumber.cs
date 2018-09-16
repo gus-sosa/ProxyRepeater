@@ -2,7 +2,7 @@
 {
     public enum ErrorNumber
     {
-        ExistingClient,
+        ExistingClient = 2,
         NoError = 0,
         ClientDoesNotExist = 1
     }

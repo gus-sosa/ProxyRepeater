@@ -13,7 +13,7 @@ namespace ProxyRepeater.ConsoleClient
     internal class Program
     {
         private const double _timeToWaitBeforeRetryInMs = 3000;
-        private const int _numTimesToRetry = 3;
+        private const int _numTimesToRetry = 5;
 
         public static NancyHost Host { get; private set; }
 
@@ -59,18 +59,18 @@ namespace ProxyRepeater.ConsoleClient
         {
             PolicyResult<HttpResponseMessage> httpResponseMsg = await Policy
                             .Handle<HttpRequestException>()
-                            .WaitAndRetryAsync(Enumerable.Repeat(TimeSpan.FromMilliseconds(_timeToWaitBeforeRetryInMs) , _numTimesToRetry) , (exception , retryCount , context) =>
+                            .Or<Exception>()
+                            .WaitAndRetryAsync(Enumerable.Repeat(TimeSpan.FromMilliseconds(_timeToWaitBeforeRetryInMs) , _numTimesToRetry) , (exception , timeSpan , retryCount , context) =>
                             {
-                                //TODO-LOG: Log error + count 
+                                Console.WriteLine($"Problem connecting to proxy repeater server. Retrying. {retryCount} times");
+                                Console.WriteLine($"Waiting {timeSpan.Seconds} seconds before retrying");
                             })
                               .ExecuteAndCaptureAsync(async () =>
-                              await $"https://{serverIp}:{serverPort}/".PostJsonAsync(new { clientName , port = portToListen })
+                              await $"http://{serverIp}:{serverPort}/{clientName}/{portToListen}".PostAsync(null)
                               );
 
-            Console.WriteLine(httpResponseMsg.Outcome == OutcomeType.Failure ? "Problem connecting to Proxy Repeater server" : $"Connected to Proxy Repeater at: {serverIp}");
+            Console.WriteLine(httpResponseMsg.Outcome == OutcomeType.Failure ? "Problem connecting to Proxy Repeater server. Retrying stopped." : $"Connected to Proxy Repeater at: {serverIp}");
         }
-
-        private static IPAddress GetIp() => Dns.GetHostByName(Dns.GetHostName()).AddressList[0];
 
         private static void RunLocalWebServer(int portToListen)
         {
