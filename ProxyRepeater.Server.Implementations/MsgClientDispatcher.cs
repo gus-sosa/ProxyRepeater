@@ -85,7 +85,7 @@ namespace ProxyRepeater.Server.Implementations
                         PolicyResult<HttpResponseMessage> httpResponseMsg = await Policy
                             .Handle<HttpRequestException>()
                             .OrResult<HttpResponseMessage>(r => httpStatusCodesWorthRetrying.Contains(r.StatusCode))
-                            .WaitAndRetry(Enumerable.Repeat(TimeSpan.FromMilliseconds(_timeToWaitBeforeRetryInMs) , _numTimesToRetry) , (exception , retryCount , context) =>
+                            .WaitAndRetryAsync(Enumerable.Repeat(TimeSpan.FromMilliseconds(_timeToWaitBeforeRetryInMs) , _numTimesToRetry) , (exception , retryCount , context) =>
                               {
                                   //TODO-LOG: Log error + count 
                               })

@@ -75,6 +75,7 @@
   <ItemGroup>
     <Compile Include="IMessageHandler.cs" />
     <Compile Include="LocalWebServer.cs" />
+    <Compile Include="MessageHandler.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -12,12 +12,14 @@ namespace ProxyRepeater.ConsoleClient
             public string Message { get; set; }
         }
 
-        public LocalWebServer(IMessageHandler messageHandler)
+        public IMessageHandler MessageHandler { get; set; } = new MessageHandler();
+
+        public LocalWebServer()
         {
             Post["/"] = _ =>
              {
                  ServerMessageModel model = this.Bind<ServerMessageModel>();
-                 messageHandler.HandleMessage(model.Message);
+                 MessageHandler.HandleMessage(model.Message);
                  return OK;
              };
         }
