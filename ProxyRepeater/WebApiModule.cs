@@ -11,10 +11,10 @@ namespace ProxyRepeater.Server
         private const string OK = "OK";
         private const string FAILED = "";
 
-        public WebApiModule(IExchanger exchanger) => this.exchanger = exchanger ?? throw new System.ArgumentNullException(nameof(exchanger));
-
-        public WebApiModule()
+        public WebApiModule(IExchanger exchanger)
         {
+            this.exchanger = exchanger ?? throw new System.ArgumentNullException(nameof(exchanger));
+            Get["/test"] = _ => "GOOD - SERVER";
             Get["/"] = _ => exchanger.GetClients();
             Post["/{clientName}/{port:int}"] = parameters =>
             {
