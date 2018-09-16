@@ -132,7 +132,7 @@ namespace ProxyRepeater.Server.Implementations
 
         protected Dispatcher _dispatcher;
 
-        public ConcurrentDictionary<string , ExClient> Clients { get; set; }
+        public ConcurrentDictionary<string , ExClient> Clients { get; set; } = new ConcurrentDictionary<string , ExClient>();
 
         public ErrorNumber AddClient(ExClient client) => Clients.TryAdd(client.Name , client) ? ErrorNumber.NoError : ErrorNumber.NoError;
 
