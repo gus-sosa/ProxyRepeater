@@ -1,5 +1,6 @@
 ﻿using Nancy;
 using ProxyRepeater.Server.Core;
+using System.Net;
 
 namespace ProxyRepeater.Server
 {
@@ -15,7 +16,11 @@ namespace ProxyRepeater.Server
         public WebApiModule()
         {
             Get["/"] = _ => exchanger.GetClients();
-            Post["/{clientName}/{port:int}"] = parameters => AddClient(parameters.clientName , parameters.port);
+            Post["/{clientName}/{port:int}"] = parameters =>
+            {
+                IPAddress.TryParse(Context.Request.UserHostAddress , out IPAddress ip);
+                return AddClient(parameters.clientName , ip , parameters.port);
+            };
             Delete["/{clientName}"] = parameters => RemoveClient(parameters.clientName);
             Get["/Ping/{clientName}"] = parameters => PingClient(parameters.clientName);
         }
@@ -32,9 +37,9 @@ namespace ProxyRepeater.Server
             return OK;
         }
 
-        private dynamic AddClient(string clientName , int port)
+        private dynamic AddClient(string clientName , IPAddress ip , int port)
         {
-            var client = new ExClient() { Name = clientName , Port = port };
+            var client = new ExClient() { Name = clientName , IpAddress = ip , Port = port };
             ErrorNumber error = exchanger.AddClient(client);
             return error == ErrorNumber.NoError ? OK : $"Problem with the request: ErrorNumber: {error}";
         }
