@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using Flurl;
 using Flurl.Http;
 using Nancy.Hosting.Self;
 using Polly;
@@ -66,7 +67,9 @@ namespace ProxyRepeater.ConsoleClient
                                 Console.WriteLine($"Waiting {timeSpan.Seconds} seconds before retrying");
                             })
                               .ExecuteAndCaptureAsync(async () =>
-                              await $"http://{serverIp}:{serverPort}/{clientName}/{portToListen}".PostAsync(null)
+                              await $"http://{serverIp}:{serverPort}"
+                                .AppendPathSegments(clientName , portToListen)
+                                .PostAsync(null)
                               );
 
             Console.WriteLine(httpResponseMsg.Outcome == OutcomeType.Failure ? "Problem connecting to Proxy Repeater server. Retrying stopped." : $"Connected to Proxy Repeater at: {serverIp}");
