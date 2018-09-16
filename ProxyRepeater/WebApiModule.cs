@@ -18,11 +18,17 @@ namespace ProxyRepeater.Server
 
         private const string OK = "OK";
         private const string FAILED = "";
+        private const string GOOD_SERVER = "GOOD - SERVER";
 
         public WebApiModule(IExchanger exchanger)
         {
             this.exchanger = exchanger ?? throw new System.ArgumentNullException(nameof(exchanger));
-            Get["/test"] = _ => "GOOD - SERVER";
+            RegisterRoutes();
+        }
+
+        private void RegisterRoutes()
+        {
+            Get["/test"] = _ => GOOD_SERVER;
             Get["/"] = _ => Response.AsJson(exchanger.GetClients());
             Post["/{clientName}/{port:int}"] = parameters =>
             {
