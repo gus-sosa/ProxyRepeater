@@ -18,7 +18,7 @@ namespace ProxyRepeater.Server.Implementations
             if (endPoint == null) throw new ArgumentNullException(nameof(endPoint));
             _msgDeliverer = msgDeliverer ?? throw new ArgumentNullException(nameof(msgDeliverer));
 
-            _proxyServer = new ProxyServer();
+            _proxyServer = new ProxyServer() { ForwardToUpstreamGateway = true };
             _proxyServer.CertificateManager.TrustRootCertificate();
             _proxyServer.AfterResponse += AfterResponseEvent;
             _proxyServer.AddEndPoint(endPoint);
