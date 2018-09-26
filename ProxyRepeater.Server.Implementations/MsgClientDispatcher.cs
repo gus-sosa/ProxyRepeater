@@ -64,11 +64,13 @@ namespace ProxyRepeater.Server.Implementations
                     return list;
                 }
 
+                Action RunActionForever(Action action) => () => { while (true) action(); };
+
                 SetConfigurationValueByParameterName(ParameterNameForConsumerNewMsgs , 1 , ref _numThreadsToConsumeNewMsgs);
                 SetConfigurationValueByParameterName(ParameterNameForNumWorkers , 3 , ref _numWorkersToDeliverMsgs);
 
-                NewMsgsConsumerTasks = CreateThreadWorkers(_numThreadsToConsumeNewMsgs , ProcessNewMessage);
-                DeliverWorkerTasks = CreateThreadWorkers(_numWorkersToDeliverMsgs , DeliverMsg);
+                NewMsgsConsumerTasks = CreateThreadWorkers(_numThreadsToConsumeNewMsgs , RunActionForever(ProcessNewMessage));
+                DeliverWorkerTasks = CreateThreadWorkers(_numWorkersToDeliverMsgs , RunActionForever(DeliverMsg));
                 MsgClientDispatcher = msgClientDispatcher;
             }
 
@@ -104,7 +106,7 @@ namespace ProxyRepeater.Server.Implementations
                         }
                     }
                 }
-                else await Task.Delay(_timeToWaitWhenEmptyQueueInMs);
+                else Task.Delay(_timeToWaitWhenEmptyQueueInMs).Wait();
             }
 
             private async Task<HttpResponseMessage> SendMsg(string message , ExClient client) => await $"https://{client.IpAddress.ToString()}:{client.Port}"
@@ -124,7 +126,7 @@ namespace ProxyRepeater.Server.Implementations
                 else await Task.Delay(_timeToWaitWhenEmptyQueueInMs);
             }
 
-            public ConcurrentQueue<string> NewMsgArrivals { get; set; }
+            public ConcurrentQueue<string> NewMsgArrivals { get; set; } = new ConcurrentQueue<string>();
             public IEnumerable<(Task Task, CancellationTokenSource CancellationSource)> NewMsgsConsumerTasks { get; private set; }
             public IEnumerable<(Task Task, CancellationTokenSource CancellationSource)> DeliverWorkerTasks { get; private set; }
             public MsgClientDispatcher MsgClientDispatcher { get; }
