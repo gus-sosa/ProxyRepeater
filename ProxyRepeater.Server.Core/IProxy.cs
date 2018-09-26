@@ -2,7 +2,7 @@
 {
     public interface IProxy
     {
-        void Listen(int port);
+        void Listen(int? port = null);
         void Stop();
     }
 }

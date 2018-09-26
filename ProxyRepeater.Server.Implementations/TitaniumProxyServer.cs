@@ -22,6 +22,8 @@ namespace ProxyRepeater.Server.Implementations
             _proxyServer.CertificateManager.TrustRootCertificate();
             _proxyServer.AfterResponse += AfterResponseEvent;
             _proxyServer.AddEndPoint(endPoint);
+
+            msgDeliverer.RestartDeliverProcess();
         }
 
         public TitaniumProxyServer(IMsgDeliverer deliverer) : this(deliverer , new ExplicitProxyEndPoint(IPAddress.Any , DefaultProxyPort , true)) { }
@@ -29,7 +31,15 @@ namespace ProxyRepeater.Server.Implementations
         private readonly IMsgDeliverer _msgDeliverer;
         private ProxyServer _proxyServer;
 
-        public void Listen(int port) => _proxyServer.Start();
+        public void Listen(int? port = null)
+        {
+            if (port.HasValue)
+            {
+                _proxyServer.ProxyEndPoints.Clear();
+                _proxyServer.AddEndPoint(new ExplicitProxyEndPoint(IPAddress.Any , port.Value));
+            }
+            _proxyServer.Start();
+        }
 
         public void Stop() => _proxyServer.Stop();
 
