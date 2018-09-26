@@ -112,9 +112,9 @@ namespace ProxyRepeater.Server.Implementations
             private async Task<HttpResponseMessage> SendMsg(string message , ExClient client) => await $"https://{client.IpAddress.ToString()}:{client.Port}"
                     .PostJsonAsync(new { Message = message });
 
-            private async void ProcessNewMessage()
+            private void ProcessNewMessage()
             {
-                if (NewMsgArrivals.TryDequeue(out var newMsg))
+                if (NewMsgArrivals.TryDequeue(out var newMsg) && MsgClientDispatcher.Clients.Count > 0)
                 {
                     var pendingMsg = new MsgPendingModel() { Message = newMsg };
                     foreach (ExClient item in MsgClientDispatcher.Clients.Values)
@@ -123,7 +123,7 @@ namespace ProxyRepeater.Server.Implementations
                     _pendingMsgs[guid] = pendingMsg;
                     _msgsToDeliver.Enqueue(guid);
                 }
-                else await Task.Delay(_timeToWaitWhenEmptyQueueInMs);
+                else Task.Delay(_timeToWaitWhenEmptyQueueInMs).Wait();
             }
 
             public ConcurrentQueue<string> NewMsgArrivals { get; set; } = new ConcurrentQueue<string>();
