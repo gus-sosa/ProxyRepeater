@@ -14,18 +14,27 @@ namespace ProxyRepeater.Server.Implementations.Models
         private SessionEventArgs TitaniumSession { get; }
 
         public string GetMessage()
-            => new HttpMsg()
+        {
+            try
             {
-                HttpVersion = TitaniumSession.WebSession.Request.HttpVersion.ToString() ,
-                Method = HttpMsg.GetMethod(TitaniumSession.WebSession.Request.Method) ,
-                RequestBody = TitaniumSession.WebSession.Request.BodyString ,
-                RequestHeaders = ConvertHeaders(TitaniumSession.WebSession.Request.Headers) ,
-                ResponseBody = TitaniumSession.WebSession.Response.BodyString ,
-                ResponseHeaders = ConvertHeaders(TitaniumSession.WebSession.Response.Headers) ,
-                ResponseStatusCode = TitaniumSession.WebSession.Response.StatusCode ,
-                ResponseStatusDescription = TitaniumSession.WebSession.Response.StatusDescription ,
-                Url = TitaniumSession.WebSession.Request.Url
-            }.GetMessage();
+                return new HttpMsg()
+                {
+                    HttpVersion = TitaniumSession.WebSession.Request.HttpVersion.ToString() ,
+                    Method = HttpMsg.GetMethod(TitaniumSession.WebSession.Request.Method) ,
+                    RequestBody = HttpMsg.GetRequestBody(TitaniumSession),
+                    RequestHeaders = ConvertHeaders(TitaniumSession.WebSession.Request.Headers) ,
+                    ResponseBody = HttpMsg.GetResponseBody(TitaniumSession),
+                    ResponseHeaders = ConvertHeaders(TitaniumSession.WebSession.Response.Headers) ,
+                    ResponseStatusCode = TitaniumSession.WebSession.Response.StatusCode ,
+                    ResponseStatusDescription = TitaniumSession.WebSession.Response.StatusDescription ,
+                    Url = TitaniumSession.WebSession.Request.Url
+                }.GetMessage();
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
 
         private List<(string name, string value)> ConvertHeaders(HeaderCollection headers)
         {

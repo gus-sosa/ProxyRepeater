@@ -1,7 +1,9 @@
 ﻿using ProxyRepeater.Server.Core;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using Titanium.Web.Proxy.EventArguments;
 
 namespace ProxyRepeater.Server.Implementations.Models
 {
@@ -36,6 +38,20 @@ namespace ProxyRepeater.Server.Implementations.Models
         public int ResponseStatusCode { get; set; }
 
         internal static Method GetMethod(string method) => Enum.TryParse<Method>(method , out Method parsedMethod) ? parsedMethod : Method.UNKNOWN;
+
+        internal static IEnumerable<Method> RequestsWithBody = new[] { Method.POST , Method.PUT , Method.PATCH };
+
+        internal static string GetRequestBody(SessionEventArgs session)
+        {
+            Method method = GetMethod(session.WebSession.Request.Method);
+            return RequestsWithBody.Contains(method) && session.WebSession.Request.ContentLength > 0 ? session.GetRequestBodyAsString().Result : string.Empty;
+        }
+
+        internal static string GetResponseBody(SessionEventArgs session)
+        {
+            Method method = GetMethod(session.WebSession.Request.Method);
+            return RequestsWithBody.Contains(method) && session.WebSession.Response.ContentLength > 0 ? session.GetResponseBodyAsString().Result : string.Empty;
+        }
 
         public string ResponseStatusDescription { get; set; }
 
