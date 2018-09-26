@@ -21,9 +21,9 @@ namespace ProxyRepeater.Server.Implementations.Models
                 {
                     HttpVersion = TitaniumSession.WebSession.Request.HttpVersion.ToString() ,
                     Method = HttpMsg.GetMethod(TitaniumSession.WebSession.Request.Method) ,
-                    RequestBody = HttpMsg.GetRequestBody(TitaniumSession),
+                    RequestBody = HttpMsg.GetRequestBody(TitaniumSession) ,
                     RequestHeaders = ConvertHeaders(TitaniumSession.WebSession.Request.Headers) ,
-                    ResponseBody = HttpMsg.GetResponseBody(TitaniumSession),
+                    ResponseBody = HttpMsg.GetResponseBody(TitaniumSession) ,
                     ResponseHeaders = ConvertHeaders(TitaniumSession.WebSession.Response.Headers) ,
                     ResponseStatusCode = TitaniumSession.WebSession.Response.StatusCode ,
                     ResponseStatusDescription = TitaniumSession.WebSession.Response.StatusDescription ,
@@ -32,7 +32,7 @@ namespace ProxyRepeater.Server.Implementations.Models
             }
             catch (Exception e)
             {
-                throw e;
+                return "";
             }
         }
 
