@@ -65,6 +65,7 @@
     <Compile Include="ClientMessage.cs" />
     <Compile Include="Models\HttpMsg.cs" />
     <Compile Include="Models\HttpTitaniumSessionAdapter.cs" />
+    <Compile Include="Models\ISessionReader.cs" />
     <Compile Include="MsgClientDispatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TitaniumProxyServer.cs" />

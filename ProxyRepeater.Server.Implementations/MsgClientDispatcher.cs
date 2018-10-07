@@ -114,16 +114,22 @@ namespace ProxyRepeater.Server.Implementations
 
             private void ProcessNewMessage()
             {
-                if (NewMsgArrivals.TryDequeue(out var newMsg) && MsgClientDispatcher.Clients.Count > 0)
+                if (MsgClientDispatcher.Clients.Count == 0)
+                    while (NewMsgArrivals.TryDequeue(out _)) ;
+                else
                 {
-                    var pendingMsg = new MsgPendingModel() { Message = newMsg };
-                    foreach (ExClient item in MsgClientDispatcher.Clients.Values)
-                        pendingMsg.ClientsToDeliver.Enqueue(item);
-                    var guid = Guid.NewGuid();
-                    _pendingMsgs[guid] = pendingMsg;
-                    _msgsToDeliver.Enqueue(guid);
+                    if (NewMsgArrivals.TryDequeue(out var newMsg))
+                    {
+                        var pendingMsg = new MsgPendingModel() { Message = newMsg };
+                        foreach (ExClient item in MsgClientDispatcher.Clients.Values)
+                            pendingMsg.ClientsToDeliver.Enqueue(item);
+                        var guid = Guid.NewGuid();
+                        _pendingMsgs[guid] = pendingMsg;
+                        _msgsToDeliver.Enqueue(guid);
+                        return;
+                    }
                 }
-                else Task.Delay(_timeToWaitWhenEmptyQueueInMs).Wait();
+                Task.Delay(_timeToWaitWhenEmptyQueueInMs).Wait();
             }
 
             public ConcurrentQueue<string> NewMsgArrivals { get; set; } = new ConcurrentQueue<string>();
