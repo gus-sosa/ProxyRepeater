@@ -55,7 +55,7 @@ namespace ProxyRepeater.Server
 
         private static void SetupDependencies() =>
             Container
-                .Register(_ => new MsgClientDispatcher() , new PerContainerLifetime())
+                .Register<MsgClientDispatcher>(new PerContainerLifetime())
                 .Register<IClientMsg , ClientMessage>()
                 .Register<IExchanger>(factory => factory.GetInstance<MsgClientDispatcher>())
                 .Register<IMsgDeliverer>(factory => factory.GetInstance<MsgClientDispatcher>())
