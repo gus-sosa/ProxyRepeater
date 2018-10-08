@@ -109,7 +109,7 @@ namespace ProxyRepeater.Server.Implementations
                 else Task.Delay(_timeToWaitWhenEmptyQueueInMs).Wait();
             }
 
-            private async Task<HttpResponseMessage> SendMsg(string message , ExClient client) => await $"https://{client.IpAddress.ToString()}:{client.Port}"
+            private async Task<HttpResponseMessage> SendMsg(string message , ExClient client) => await $"http://{client.IpAddress.ToString()}:{client.Port}"
                     .PostJsonAsync(new { Message = message });
 
             private void ProcessNewMessage()

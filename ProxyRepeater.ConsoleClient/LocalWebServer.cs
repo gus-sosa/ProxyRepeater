@@ -8,7 +8,7 @@ namespace ProxyRepeater.ConsoleClient
         private const string OK = "OK";
         private const string GOOD = "GOOD";
 
-        private class ServerMessageModel
+        public class ServerMessageModel
         {
             public string Message { get; set; }
         }
@@ -31,10 +31,10 @@ namespace ProxyRepeater.ConsoleClient
         {
             ServerMessageModel model;
             try { model = this.Bind<ServerMessageModel>(); }
-            catch (System.Exception e) { return Response.AsJson("Bad message" , HttpStatusCode.InternalServerError); }
+            catch (System.Exception e) { return Response.AsJson("Bad message" , HttpStatusCode.OK); }
 
             try { MessageHandler.HandleMessage(model.Message); }
-            catch (System.Exception) { Response.AsJson("Internal server error" , HttpStatusCode.InternalServerError); }
+            catch (System.Exception) { Response.AsJson("Internal server error" , HttpStatusCode.OK); }
 
             return OK;
         }
