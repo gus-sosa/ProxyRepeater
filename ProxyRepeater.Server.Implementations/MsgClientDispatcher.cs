@@ -112,18 +112,24 @@ namespace ProxyRepeater.Server.Implementations
             private async Task<HttpResponseMessage> SendMsg(string message , ExClient client) => await $"https://{client.IpAddress.ToString()}:{client.Port}"
                     .PostJsonAsync(new { Message = message });
 
-            private async void ProcessNewMessage()
+            private void ProcessNewMessage()
             {
-                if (NewMsgArrivals.TryDequeue(out var newMsg))
+                if (MsgClientDispatcher.Clients.Count == 0)
+                    while (NewMsgArrivals.TryDequeue(out _)) ;
+                else
                 {
-                    var pendingMsg = new MsgPendingModel() { Message = newMsg };
-                    foreach (ExClient item in MsgClientDispatcher.Clients.Values)
-                        pendingMsg.ClientsToDeliver.Enqueue(item);
-                    var guid = Guid.NewGuid();
-                    _pendingMsgs[guid] = pendingMsg;
-                    _msgsToDeliver.Enqueue(guid);
+                    if (NewMsgArrivals.TryDequeue(out var newMsg))
+                    {
+                        var pendingMsg = new MsgPendingModel() { Message = newMsg };
+                        foreach (ExClient item in MsgClientDispatcher.Clients.Values)
+                            pendingMsg.ClientsToDeliver.Enqueue(item);
+                        var guid = Guid.NewGuid();
+                        _pendingMsgs[guid] = pendingMsg;
+                        _msgsToDeliver.Enqueue(guid);
+                        return;
+                    }
                 }
-                else await Task.Delay(_timeToWaitWhenEmptyQueueInMs);
+                Task.Delay(_timeToWaitWhenEmptyQueueInMs).Wait();
             }
 
             public ConcurrentQueue<string> NewMsgArrivals { get; set; } = new ConcurrentQueue<string>();

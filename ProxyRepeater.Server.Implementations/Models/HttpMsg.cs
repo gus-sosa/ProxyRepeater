@@ -44,13 +44,25 @@ namespace ProxyRepeater.Server.Implementations.Models
         internal static string GetRequestBody(SessionEventArgs session)
         {
             Method method = GetMethod(session.WebSession.Request.Method);
-            return RequestsWithBody.Contains(method) && session.WebSession.Request.ContentLength > 0 ? session.GetRequestBodyAsString().Result : string.Empty;
+            var result = string.Empty;
+            if (RequestsWithBody.Contains(method) && session.WebSession.Request.ContentLength > 0)
+            {
+                result = session.GetRequestBodyAsString().Result;
+                session.SetRequestBodyString(result);
+            }
+            return result;
         }
 
         internal static string GetResponseBody(SessionEventArgs session)
         {
             Method method = GetMethod(session.WebSession.Request.Method);
-            return RequestsWithBody.Contains(method) && session.WebSession.Response.ContentLength > 0 ? session.GetResponseBodyAsString().Result : string.Empty;
+            var result = string.Empty;
+            if (RequestsWithBody.Contains(method) && session.WebSession.Response.ContentLength > 0)
+            {
+                result = session.GetResponseBodyAsString().Result;
+                session.SetResponseBodyString(result);
+            }
+            return result;
         }
 
         public string ResponseStatusDescription { get; set; }

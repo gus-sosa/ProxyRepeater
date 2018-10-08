@@ -1,40 +1,26 @@
 ﻿using ProxyRepeater.Server.Core;
 using System;
 using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
 using Titanium.Web.Proxy.EventArguments;
 using Titanium.Web.Proxy.Http;
 using Titanium.Web.Proxy.Models;
 
 namespace ProxyRepeater.Server.Implementations.Models
 {
-    public class HttpTitaniumSessionAdapter : IClientMsg
+    public class HttpTitaniumSessionAdapter : ISessionReader<HttpTitaniumSessionAdapter>, IClientMsg
     {
         public HttpTitaniumSessionAdapter(SessionEventArgs e) => TitaniumSession = e ?? throw new ArgumentNullException(nameof(e));
 
-        private SessionEventArgs TitaniumSession { get; }
+        private SessionEventArgs TitaniumSession { get; set; }
 
-        public string GetMessage()
-        {
-            try
-            {
-                return new HttpMsg()
-                {
-                    HttpVersion = TitaniumSession.WebSession.Request.HttpVersion.ToString() ,
-                    Method = HttpMsg.GetMethod(TitaniumSession.WebSession.Request.Method) ,
-                    RequestBody = HttpMsg.GetRequestBody(TitaniumSession),
-                    RequestHeaders = ConvertHeaders(TitaniumSession.WebSession.Request.Headers) ,
-                    ResponseBody = HttpMsg.GetResponseBody(TitaniumSession),
-                    ResponseHeaders = ConvertHeaders(TitaniumSession.WebSession.Response.Headers) ,
-                    ResponseStatusCode = TitaniumSession.WebSession.Response.StatusCode ,
-                    ResponseStatusDescription = TitaniumSession.WebSession.Response.StatusDescription ,
-                    Url = TitaniumSession.WebSession.Request.Url
-                }.GetMessage();
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
+        private string _requestHeaders = string.Empty;
+        private string _requestBody = string.Empty;
+        private string _responseHeaders = string.Empty;
+        private string _responseBody = string.Empty;
+
+        public string GetMessage() => $"{_requestHeaders}\n{_requestBody}{_responseHeaders}\n{_responseBody}";
 
         private List<(string name, string value)> ConvertHeaders(HeaderCollection headers)
         {
@@ -42,6 +28,44 @@ namespace ProxyRepeater.Server.Implementations.Models
             foreach (HttpHeader header in headers)
                 list.Add(new ValueTuple<string , string>(header.Name , header.Value));
             return list;
+        }
+
+        private string HeadersToString(List<(string name, string value)> list)
+        {
+            var strBuilder = new StringBuilder();
+            foreach ((string name, string value) item in list)
+                strBuilder.Append($"{item.name}: {item.value}");
+            return strBuilder.ToString();
+        }
+
+        public HttpTitaniumSessionAdapter ReadRequestHeaders()
+        {
+            _requestHeaders = HeadersToString(ConvertHeaders(TitaniumSession.WebSession.Request.Headers));
+            return this;
+        }
+
+        public HttpTitaniumSessionAdapter ReadResponseHeaders()
+        {
+            _responseHeaders = HeadersToString(ConvertHeaders(TitaniumSession.WebSession.Response.Headers));
+            return this;
+        }
+
+        public async Task<HttpTitaniumSessionAdapter> ReadRequestBody()
+        {
+            _requestBody = await TitaniumSession.GetRequestBodyAsString();
+            return this;
+        }
+
+        public async Task<HttpTitaniumSessionAdapter> ReadResponseBody()
+        {
+            _responseBody = await TitaniumSession.GetResponseBodyAsString();
+            return this;
+        }
+
+        internal HttpTitaniumSessionAdapter UpdateSession(SessionEventArgs e)
+        {
+            TitaniumSession = e;
+            return this;
         }
     }
 }
