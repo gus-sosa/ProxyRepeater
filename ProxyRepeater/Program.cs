@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using LightInject;
+using LightInject.Nancy;
 using Nancy.Hosting.Self;
 using ProxyRepeater.Server.Core;
 using ProxyRepeater.Server.Implementations;
@@ -41,7 +42,7 @@ namespace ProxyRepeater.Server
         private static void TurnOnWebApi(int webApiPort)
         {
             var uri = new Uri($"http://localhost:{webApiPort}");
-            WebApiHost = new NancyHost(uri);
+            WebApiHost = new NancyHost(new Bootstrapper() , uri);
             WebApiHost.Start();
             Console.WriteLine($"Web api running on: {uri.AbsoluteUri}");
         }
@@ -60,5 +61,10 @@ namespace ProxyRepeater.Server
                 .Register<IExchanger>(factory => factory.GetInstance<MsgClientDispatcher>())
                 .Register<IMsgDeliverer>(factory => factory.GetInstance<MsgClientDispatcher>())
                 .Register<IProxy , TitaniumProxyServer>();
+
+        public class Bootstrapper : LightInjectNancyBootstrapper
+        {
+            protected override IServiceContainer GetServiceContainer() => Container;
+        }
     }
 }
