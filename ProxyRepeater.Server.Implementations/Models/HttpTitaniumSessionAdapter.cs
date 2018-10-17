@@ -59,6 +59,7 @@ namespace ProxyRepeater.Server.Implementations.Models
         public async Task<HttpTitaniumSessionAdapter> ReadResponseBody()
         {
             _responseBody = await TitaniumSession.GetResponseBodyAsString();
+            TitaniumSession.SetResponseBodyString(_responseBody);
             return this;
         }
 

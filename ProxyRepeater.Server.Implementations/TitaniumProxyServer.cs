@@ -22,7 +22,7 @@ namespace ProxyRepeater.Server.Implementations
 
             _proxyServer = new ProxyServer() { ForwardToUpstreamGateway = true };
             _proxyServer.CertificateManager.TrustRootCertificate();
-            _proxyServer.AfterResponse += AfterResponseEvent;
+            _proxyServer.BeforeResponse += BeforeResponseEvent;
             _proxyServer.BeforeRequest += BeforeRequestEvent;
             _proxyServer.AddEndPoint(endPoint);
 
@@ -55,7 +55,7 @@ namespace ProxyRepeater.Server.Implementations
 
         public void Stop() => _proxyServer.Stop();
 
-        private async Task AfterResponseEvent(object sender , SessionEventArgs e)
+        private async Task BeforeResponseEvent(object sender , SessionEventArgs e)
         {
             var key = (Guid)e.UserData;
             if (sessionRecords.TryRemove(key , out HttpTitaniumSessionAdapter sessionAdapter))
